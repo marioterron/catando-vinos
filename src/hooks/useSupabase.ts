@@ -1,25 +1,18 @@
 import { useEffect, useState } from "react";
-import { supabase, DbTastingNote } from "../lib/supabase";
-import { TastingNote } from "../types/wine";
-import { WINES } from "../constants/wines";
 
-// Mock session for development
-const DEV_SESSION = {
-  user: {
-    id: "dev-user",
-    email: "dev@example.com",
-  },
-};
+import { DEV_SESSION } from "../constants/auth";
+import { IS_DEV } from "../constants/environment";
+import { WINES } from "../constants/wines";
+import { DbTastingNote, supabase } from "../lib/supabase";
+import type { TastingNote } from "../types/wine";
 
 export function useSupabase() {
-  const [session, setSession] = useState(
-    import.meta.env.DEV ? DEV_SESSION : null
-  );
-  const [loading, setLoading] = useState(!import.meta.env.DEV);
+  const [session, setSession] = useState(IS_DEV ? DEV_SESSION : null);
+  const [loading, setLoading] = useState(!IS_DEV);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (import.meta.env.DEV) return;
+    if (IS_DEV) return;
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -37,7 +30,7 @@ export function useSupabase() {
   }, []);
 
   const signIn = async (email: string) => {
-    if (import.meta.env.DEV) {
+    if (IS_DEV) {
       setSession(DEV_SESSION);
       return { error: null };
     }
@@ -57,7 +50,7 @@ export function useSupabase() {
   };
 
   const signOut = async () => {
-    if (import.meta.env.DEV) {
+    if (IS_DEV) {
       setSession(null);
       return;
     }
@@ -74,7 +67,7 @@ export function useSupabase() {
     try {
       if (!session?.user) throw new Error("No user logged in");
 
-      if (import.meta.env.DEV) {
+      if (IS_DEV) {
         const savedNotes = localStorage.getItem("wine-tastings");
         const notes = savedNotes ? JSON.parse(savedNotes) : [];
         const updatedNotes = [...notes, note];
@@ -143,7 +136,7 @@ export function useSupabase() {
   const subscribeToTastingNotes = (
     onUpdate: (notes: TastingNote[]) => void
   ) => {
-    if (import.meta.env.DEV) {
+    if (IS_DEV) {
       const handleStorageChange = (e: StorageEvent) => {
         if (e.key === "wine-tastings") {
           const notes = e.newValue ? JSON.parse(e.newValue) : [];
@@ -188,7 +181,7 @@ export function useSupabase() {
     try {
       if (!session?.user) throw new Error("No user logged in");
 
-      if (import.meta.env.DEV) {
+      if (IS_DEV) {
         const savedNotes = localStorage.getItem("wine-tastings");
         return {
           data: savedNotes ? JSON.parse(savedNotes) : [],
@@ -235,7 +228,7 @@ export function useSupabase() {
     try {
       if (!session?.user) throw new Error("No user logged in");
 
-      if (import.meta.env.DEV) {
+      if (IS_DEV) {
         localStorage.removeItem("wine-tastings");
         window.dispatchEvent(
           new StorageEvent("storage", {

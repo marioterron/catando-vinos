@@ -6,6 +6,7 @@ import type { TastingNote } from "../types/wine";
 import Footer from "./Footer";
 import Modal from "./Modal";
 import WineCard from "./WineCard";
+import { IS_DEV } from "../constants/environment";
 
 interface TastingHistoryProps {
   notes: TastingNote[];
@@ -78,7 +79,7 @@ export default function TastingHistory({
       },
     };
 
-    if (session?.user && !import.meta.env.DEV) {
+    if (session?.user && !IS_DEV) {
       const { error } = await updateTastingNote(updatedNote);
       if (error) {
         console.error("Error updating note:", error);
